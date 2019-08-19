@@ -31,3 +31,7 @@ except KeyboardInterrupt:
 
 print('Scan complete. Found %i transmitters.' % str(known_transmitters))
 
+for transmitter in known_transmitters:
+  try:
+    scanner.sendto('sensorgrid service foo', transmitter['address'])
+  except: pass

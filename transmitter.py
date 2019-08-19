@@ -19,13 +19,13 @@ def find_request(reqs, addr):
   return False
 
 def parse_message(message):
-    m = re.match('sensorgrid\s+(\w+)(\s+(.+))?', message)
-    if m:
-        return (m.group[0], m.group[2] if m.group[1] != '' else '')
+    m = re.split('\s+', message)
+    if m and m[0] == 'sensorgrid':
+        return (m[1], m[2] if 2 in m else None)
     else:
         return None
 
-def run_transmitter(port, main):
+def run_transmitter(port, callback):
     transmitter = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     transmitter.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     transmitter.bind(('', port))
@@ -43,19 +43,21 @@ def run_transmitter(port, main):
             if message:
                 print(message)
                 message_name, message_content = message
-                if s:
+                if message_name == 'scanner-syn':
                     if find_request(recent_requests, addr):
                         print('Received repeat ping. Ignoring.')
                     else:
                         print('Received new ping from %s. responding.' % str(addr))
                         transmitter.sendto(b'sensorgrid-transmitter-ack', addr)
                         recent_requests += [{ 'time': time.time(), 'addr': addr }]
+                elif message_name == 'service':
+                    callback(message_content)
                 else:
                     print('received other message: %s' % str(data))
     except KeyboardInterrupt:
         print('SensorGrid transmitter shutting down.')
 
-def main():
-  pass
+def main(arg):
+  print('Doing Thing: ' + arg)
 
 run_transmitter(1337, main)
