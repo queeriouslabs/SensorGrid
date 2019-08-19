@@ -5,7 +5,7 @@ import sys
 socket.setdefaulttimeout(10)
 scanner = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 scanner.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-message = 'sensorgrid-scanner-ack'.encode('utf-8') 
+message = 'sensorgrid-scanner-syn'.encode('utf-8') 
 
 scanner.sendto(message, ('<broadcast>', 1337))
 
