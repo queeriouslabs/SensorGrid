@@ -1,5 +1,6 @@
 import socket
 import time
+import sys
 
 
 
@@ -17,9 +18,15 @@ def find_request(reqs, addr):
   return False
 
 
+
+if sys.argv[1] is not None:
+  port = int(sys.argv[1])
+else:
+  port = 1337
+
 transmitter = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 transmitter.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-transmitter.bind(('', 1337))
+transmitter.bind(('', port))
 
 print('SensorGrid transmitter running.')
 

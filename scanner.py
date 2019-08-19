@@ -2,6 +2,12 @@ import socket
 import time
 import sys
 
+
+if sys.argv[0] is not None:
+  port = int(sys.argv[0])
+else:
+  port = 1337
+
 socket.setdefaulttimeout(0.1)
 scanner = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 scanner.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -13,7 +19,7 @@ known_transmitters = []
 try:
     while time.time() < start_time + 10:
         print('Scanning...')
-        scanner.sendto(message, ('<broadcast>', 1337))
+        scanner.sendto(message, ('<broadcast>', port))
         for i in range(10):
             try:
                 data, addr = scanner.recvfrom(1024)
