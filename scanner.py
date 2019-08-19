@@ -29,7 +29,7 @@ try:
 except KeyboardInterrupt:
     print('Scan exiting early.')
 
-print('Scan complete. Found %i transmitters.' % str(known_transmitters))
+print('Scan complete. Found %i transmitters.' % len(known_transmitters))
 
 for transmitter in known_transmitters:
   try:
