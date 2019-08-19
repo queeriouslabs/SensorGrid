@@ -9,4 +9,3 @@ while True:
     print('received message: %s / %s' % (data.decode('utf-8'), str(addr)))
     print('responding.')
     server.sendto(b'acknowledged!', addr)
-    break
