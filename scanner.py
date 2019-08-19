@@ -20,3 +20,6 @@ while time.time() < start_time + 10:
             known_transmitters += [addr]
     except socket.timeout: continue
     continue
+
+print('Scan complete. Found %i transmitters.' % len(known_transmitters))
+
