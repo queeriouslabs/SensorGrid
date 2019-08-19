@@ -1,37 +1,46 @@
 import socket
 import time
 import sys
+import re
+import json
+import time
 
-
-if len(sys.argv) > 1:
-  port = int(sys.argv[0])
-else:
-  port = 1337
 
 socket.setdefaulttimeout(0.1)
 scanner = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 scanner.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-message = 'sensorgrid scanner-syn'.encode('utf-8') 
+message = 'sensorgrid-syn'.encode('utf-8') 
 
 start_time = time.time()
 known_transmitters = []
 
 try:
+    sys.stdout.write('\nScanning')
+    sys.stdout.flush()
     while time.time() < start_time + 10:
-        print('Scanning...')
-        scanner.sendto(message, ('<broadcast>', port))
+        sys.stdout.write('.')
+        sys.stdout.flush()
+        scanner.sendto(message, ('<broadcast>', 1337))
         for i in range(10):
             try:
                 data, addr = scanner.recvfrom(1024)
-                if data.decode('utf-8') == 'sensorgrid-transmitter-ack':
-                    known_transmitters += [addr]
+                m = re.split('\s+', data.decode('utf-8'), 1)
+                if m[0] == 'sensorgrid-ack':
+                    known_transmitters += [(addr[0], json.loads(m[1]))]
             except socket.timeout: pass
 except KeyboardInterrupt:
+    print()
     print('Scan exiting early.')
 
-print('Scan complete. Found %i transmitters.' % len(known_transmitters))
+print('\n')
+print('Scan complete. Found %i transmitters:' % len(known_transmitters))
 
 for transmitter in known_transmitters:
-  try:
-    scanner.sendto('sensorgrid service foo', transmitter['address'])
-  except: pass
+    for service in transmitter[1]:
+        time.sleep(0.2)
+        print()
+        print('Name: ' + service['name'])
+        print('Location: http://%s:%i' % (transmitter[0], service['port']))
+        print('Description: ' + service['desc'])
+
+print()

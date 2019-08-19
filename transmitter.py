@@ -2,6 +2,8 @@ import socket
 import time
 import sys
 import re
+import threading
+import json
 
 
 
@@ -18,46 +20,56 @@ def find_request(reqs, addr):
     if req["addr"] == addr: return True
   return False
 
-def parse_message(message):
-    m = re.split('\s+', message)
-    if m and m[0] == 'sensorgrid':
-        return (m[1], m[2] if 2 in m else None)
-    else:
-        return None
-
-def run_transmitter(port, callback):
-    transmitter = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    transmitter.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    transmitter.bind(('', port))
-
-    print('SensorGrid transmitter running.')
-
-    recent_requests = []
-
-    try:
-        while True:
-            recent_requests = flush_old_requests(recent_requests)
-            data, addr = transmitter.recvfrom(1024)
-            
-            message = parse_message(data.decode('utf-8'))
-            if message:
-                print(message)
-                message_name, message_content = message
-                if message_name == 'scanner-syn':
+def transmitter_thread(name, desc, port):
+    
+    def run_transmitter():
+        service_info = { 'name': name, 'desc': desc, 'port': port }
+        known_services = [service_info]
+        
+        transmitter = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        transmitter.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        try:
+            transmitter.bind(('', 1337))
+        except OSError:
+            transmitter.sendto(('sensorgrid-register %s' % json.dumps(service_info)).encode('utf-8'), ('127.0.0.1', 1337))
+    
+        print('SensorGrid transmitter running.')
+    
+        recent_requests = []
+    
+        try:
+            while True:
+                recent_requests = flush_old_requests(recent_requests)
+                data, addr = transmitter.recvfrom(1024)
+                message = data.decode('utf-8')
+                if message == 'sensorgrid-syn':
                     if find_request(recent_requests, addr):
-                        print('Received repeat ping. Ignoring.')
+                        pass
                     else:
-                        print('Received new ping from %s. responding.' % str(addr))
-                        transmitter.sendto(b'sensorgrid-transmitter-ack', addr)
+                        print()
+                        print('Received new ping from %s.' % str(addr))
+                        transmitter.sendto(('sensorgrid-ack %s' % json.dumps(known_services)).encode('utf-8'), addr)
                         recent_requests += [{ 'time': time.time(), 'addr': addr }]
-                elif message_name == 'service':
-                    callback(message_content)
+                elif message[0:19] == 'sensorgrid-register':
+                    info = json.loads(message[20:])
+                    if 0 == len([ 1 for s in known_services if s['port'] == info['port']]):
+                        print()
+                        print('Registering other service:')
+                        print()
+                        print('  Name: ' + info['name'])
+                        print('  Port: %i' % info['port'])
+                        print('  Description: ' + info['desc'])
+                        known_services += [info]
                 else:
                     print('received other message: %s' % str(data))
-    except KeyboardInterrupt:
-        print('SensorGrid transmitter shutting down.')
+        except KeyboardInterrupt:
+            print('SensorGrid transmitter shutting down.')
 
-def main(arg):
-  print('Doing Thing: ' + arg)
 
-run_transmitter(1337, main)
+
+    t = threading.Thread(target = lambda: run_transmitter())
+    t.start()
+
+
+
+
