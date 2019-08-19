@@ -1,6 +1,7 @@
 import socket
 import time
 import sys
+import re
 
 
 
@@ -17,33 +18,44 @@ def find_request(reqs, addr):
     if req["addr"] == addr: return True
   return False
 
+def parse_message(message):
+    m = re.match('sensorgrid\s+(\w+)(\s+(.+))?', message)
+    if m:
+        return (m.group[0], m.group[2] if m.group[1] != '' else '')
+    else:
+        return None
 
+def run_transmitter(port, main):
+    transmitter = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    transmitter.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    transmitter.bind(('', port))
 
-if len(sys.argv) > 1:
-  port = int(sys.argv[1])
-else:
-  port = 1337
+    print('SensorGrid transmitter running.')
 
-transmitter = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-transmitter.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-transmitter.bind(('', port))
+    recent_requests = []
 
-print('SensorGrid transmitter running.')
+    try:
+        while True:
+            recent_requests = flush_old_requests(recent_requests)
+            data, addr = transmitter.recvfrom(1024)
+            
+            message = parse_message(data.decode('utf-8'))
+            if message:
+                print(message)
+                message_name, message_content = message
+                if s:
+                    if find_request(recent_requests, addr):
+                        print('Received repeat ping. Ignoring.')
+                    else:
+                        print('Received new ping from %s. responding.' % str(addr))
+                        transmitter.sendto(b'sensorgrid-transmitter-ack', addr)
+                        recent_requests += [{ 'time': time.time(), 'addr': addr }]
+                else:
+                    print('received other message: %s' % str(data))
+    except KeyboardInterrupt:
+        print('SensorGrid transmitter shutting down.')
 
-recent_requests = []
+def main():
+  pass
 
-try:
-    while True:
-        recent_requests = flush_old_requests(recent_requests)
-        data, addr = transmitter.recvfrom(1024)
-        if data.decode('utf-8') == 'sensorgrid-scanner-syn':
-            if find_request(recent_requests, addr):
-                print('Received repeat ping. Ignoring.')
-            else:
-                print('Received new ping from %s. responding.' % str(addr))
-                transmitter.sendto(b'sensorgrid-transmitter-ack', addr)
-                recent_requests += [{ 'time': time.time(), 'addr': addr }]
-        else:
-            print('received other message: %s' % str(data))
-except KeyboardInterrupt:
-    print('SensorGrid transmitter shutting down.')
+run_transmitter(1337, main)
