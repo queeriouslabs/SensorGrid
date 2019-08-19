@@ -3,7 +3,7 @@ import time
 import sys
 
 
-if sys.argv[0] is not None:
+if len(sys.argv) > 1:
   port = int(sys.argv[0])
 else:
   port = 1337

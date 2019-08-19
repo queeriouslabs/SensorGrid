@@ -19,7 +19,7 @@ def find_request(reqs, addr):
 
 
 
-if sys.argv[1] is not None:
+if len(sys.argv) > 1:
   port = int(sys.argv[1])
 else:
   port = 1337
