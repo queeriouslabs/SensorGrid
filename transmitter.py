@@ -9,3 +9,5 @@ while True:
     if data.decode('utf-8') == 'sensorgrid-scanner-syn':
         print('received ping from %s. responding.' % str(addr))
         transmitter.sendto(b'sensorgrid-transmitter-ack', addr)
+    else:
+        print('received other message: %s' % str(data))

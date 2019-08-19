@@ -18,5 +18,5 @@ while time.time() < start_time + 10:
         if data.decode('utf-8') == 'sensorgrid-transmitter-ack':
             print('received ack from: %s' % str(addr))
             known_transmitters += [addr]
-    except: continue
+    except: socket.timeout: continue
     continue
