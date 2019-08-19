@@ -11,3 +11,4 @@ client.sendto(message, ('<broadcast>', 1337))
 while True:
     data, addr = client.recvfrom(1024)
     print('received message: %s / %s' % (data.decode('utf-8'), str(addr)))
+    break
