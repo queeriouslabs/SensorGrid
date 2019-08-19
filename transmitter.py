@@ -31,7 +31,7 @@ def transmitter_thread(name, desc, port):
         try:
             transmitter.bind(('', 1337))
         except OSError:
-            transmitter.sendto(('sensorgrid-register %s' % json.dumps(service_info)).encode('utf-8'), ('127.0.0.1', 1337))
+            transmitter.sendto(('sel-register %s' % json.dumps(service_info)).encode('utf-8'), ('127.0.0.1', 1337))
     
         print('SensorGrid transmitter running.')
     
@@ -42,15 +42,15 @@ def transmitter_thread(name, desc, port):
                 recent_requests = flush_old_requests(recent_requests)
                 data, addr = transmitter.recvfrom(1024)
                 message = data.decode('utf-8')
-                if message == 'sensorgrid-syn':
+                if message == 'sel-syn':
                     if find_request(recent_requests, addr):
                         pass
                     else:
                         print()
                         print('Received new ping from %s.' % str(addr))
-                        transmitter.sendto(('sensorgrid-ack %s' % json.dumps(known_services)).encode('utf-8'), addr)
+                        transmitter.sendto(('sel-ack %s' % json.dumps(known_services)).encode('utf-8'), addr)
                         recent_requests += [{ 'time': time.time(), 'addr': addr }]
-                elif message[0:19] == 'sensorgrid-register':
+                elif message[0:19] == 'sel-register':
                     info = json.loads(message[20:])
                     if 0 == len([ 1 for s in known_services if s['port'] == info['port']]):
                         print()
