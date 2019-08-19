@@ -9,17 +9,21 @@ message = 'sensorgrid-scanner-syn'.encode('utf-8')
 
 scanner.sendto(message, ('<broadcast>', 1337))
 
-print('Scanning...')
+print('Scanning for transmitters...')
 start_time = time.time()
 known_transmitters = []
-while time.time() < start_time + 10:
-    try:
-        data, addr = scanner.recvfrom(1024)
-        if data.decode('utf-8') == 'sensorgrid-transmitter-ack':
-            print('received ack from: %s' % str(addr))
-            known_transmitters += [addr]
-    except socket.timeout: continue
-    continue
+
+try:
+    while time.time() < start_time + 10:
+        try:
+            data, addr = scanner.recvfrom(1024)
+            if data.decode('utf-8') == 'sensorgrid-transmitter-ack':
+                print('received ack from: %s' % str(addr))
+                known_transmitters += [addr]
+        except socket.timeout: continue
+        continue
+except KeyboardInterrupt:
+    print('Scan exiting early.')
 
 print('Scan complete. Found %i transmitters.' % len(known_transmitters))
 
