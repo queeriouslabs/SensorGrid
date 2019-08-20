@@ -30,13 +30,13 @@ else:
                 known_services += [{
                   'name': service['name'],
                   'desc': service['desc'],
-                  'addr': 'http://%s:%i' % (ip, service['port'])
+                  'url': 'http://%s:%i' % (ip, service['port'])
                 }]
             
             with open('services.json', 'w') as f:
                 f.write(json.dumps(known_services))
             
-            time.sleep(10)
+            time.sleep(60)
     
     threading.Thread(target = scanner_thread).start()
     
