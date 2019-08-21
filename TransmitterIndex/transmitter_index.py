@@ -49,7 +49,7 @@ else:
     run_scanner(scanner_thread)
 
     port = sys.argv[1]
-    run_transmitter(port, 300)
+    run_transmitter(port, 30)
     port = int(port)
 
     app = flask.Flask(__name__)
