@@ -36,7 +36,7 @@ else:
 
                 known_services = [
                     old_service for old_service in known_services
-                    if old_service['url'] != service['url'] and 30 > now - old_service['last_seen']
+                    if old_service['url'] != service['url'] and (20 * 60) > now - old_service['last_seen']
                 ]
 
                 if service not in known_services:
