@@ -3,8 +3,6 @@ import time
 import sys
 import threading
 
-from valid_port import valid_port
-
 
 def run_transmitter(port, delay):
 

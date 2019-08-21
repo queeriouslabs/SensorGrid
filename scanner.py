@@ -3,8 +3,6 @@ import sys
 import threading
 import time
 
-from valid_port import valid_port
-
 
 def run_scanner(callback):
 
@@ -20,7 +18,6 @@ def run_scanner(callback):
             data = data.decode('utf-8')
             if data[0:len(sel_flag)] == sel_flag:
                 port = data[len(sel_flag) + 1:]
-                if valid_port(port):
-                    callback((ip, port))
+                callback((ip, port))
 
     threading.Thread(target=scanner_thread).start()
