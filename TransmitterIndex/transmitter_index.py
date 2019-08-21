@@ -15,10 +15,6 @@ if len(sys.argv) < 2:
 
 else:
 
-    port = sys.argv[1]
-    run_transmitter(port, 10)
-    port = int(port)
-
     def scanner_thread(addr):
 
         now = time.time()
@@ -51,6 +47,10 @@ else:
             pass
 
     run_scanner(scanner_thread)
+
+    port = sys.argv[1]
+    run_transmitter(port, 300)
+    port = int(port)
 
     app = flask.Flask(__name__)
 
