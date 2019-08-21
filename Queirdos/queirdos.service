@@ -1,0 +1,11 @@
+[Unit]
+Description=Queirdos
+
+[Service]
+WorkingDirectory=/home/pi/Projects/SerialExperimentsLAN/Queirdos/
+User=pi
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/Projects/SerialExperimentsLAN/Queirdos/queirdos.py 1338
+
+[Install]
+WantedBy=multi-user.target
