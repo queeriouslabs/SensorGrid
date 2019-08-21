@@ -3,8 +3,6 @@ import sys
 import threading
 import time
 
-from valid_port import valid_port
-
 
 def run_scanner(callback):
 
