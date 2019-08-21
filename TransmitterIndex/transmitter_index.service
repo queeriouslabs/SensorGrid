@@ -5,7 +5,7 @@ Description=Transmitter Index
 WorkingDirectory=/home/pi/Projects/SerialExperimentsLAN/TransmitterIndex/
 User=pi
 Type=simple
-ExecStart=/home/pi/Projects/SerialExperimentsLAN/TransmitterIndex/python3 /home/pi/Projects/SerialExperimentsLAN/TransmitterIndex/transmitter_index.py
+ExecStart=/home/pi/Projects/SerialExperimentsLAN/TransmitterIndex/python3 /home/pi/Projects/SerialExperimentsLAN/TransmitterIndex/transmitter_index.py 80
 
 [Install]
 WantedBy=multi-user.target
