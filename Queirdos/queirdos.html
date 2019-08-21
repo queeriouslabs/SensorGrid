@@ -1,0 +1,36 @@
+<html>
+
+  <head>
+    <meta chartset="utf-8">
+    <link rel="icon" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ stylesheet }}">
+    <script language="javascript">
+
+      function delete_user(uid) {
+        if (confirm("Delete " + uid + "?")) {
+            window.location = "/delete/" + uid;
+        }
+      }
+
+    </script>
+  </head>
+
+  <body>
+    <h1>Add Yourself</h1>
+    <form method="post">
+      <p><input type="text" name="name" placeholder="Name" /></p>
+      <p><textarea name="info" rows="10" cols="50" placeholder="Tell us about yourself."></textarea></p>
+      <p><input type="submit" /></p>
+    </form>
+
+    <h1>Queirdos</h1>
+    {% for prof in profiles %}
+    <h2>{{ prof['name']|e }} <a href="javascript:delete_user('{{ prof['uid']|e }}');">[delete]</a></h2>
+    <p>{{ prof['info']|e }}</p>
+    </li>
+    {% endfor %}
+  </body>
+
+</html>

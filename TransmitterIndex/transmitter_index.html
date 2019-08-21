@@ -1,0 +1,31 @@
+<html>
+
+  <head>
+    <meta chartset="utf-8">
+    <link rel="icon" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ stylesheet }}">
+    <script language="javascript">
+      setInterval(function() {
+        location.reload();
+      }, 5000);
+
+    </script>
+  </head>
+
+  <body>
+    <h1>Transmitters</h1>
+    {% if transmitters|length %}
+    {% for trans in transmitters %}
+    <h2>{{ trans['name']|e }}</h2>
+    <p><a href="{{ trans['url']|e }}">{{ trans['url']|e }}</a></p>
+    <p>{{ trans['description']|e }}</p>
+    </li>
+    {% endfor %}
+    {% else %}
+    <p>There are currently no transmitters in the space. :(</p>
+    {% endif %}
+  </body>
+
+</html>

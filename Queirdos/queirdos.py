@@ -1,9 +1,11 @@
 import flask
 import sys
 import os
+import random
 import json
+from jinja2 import Template
 
-from transmitter import transmitter_thread
+from transmitter import run_transmitter
 
 if len(sys.argv) < 2:
 
@@ -11,44 +13,72 @@ if len(sys.argv) < 2:
 
 else:
 
-    port = int(sys.argv[1])
-
-    transmitter_thread('Queirdos', 'A list of folx who come to the space.', port)
+    port = sys.argv[1]
+    run_transmitter(port, 10)
+    port = int(port)
 
     app = flask.Flask(__name__)
 
-    @app.route('/', methods = ['GET'])
+    @app.route('/', methods=['GET'])
     def get_queirdos():
 
-      if not os.path.isfile('profiles.json'):
-        with open('profiles.json', 'w') as f:
-          f.write(json.dumps([]))
-      
-      with open('profiles.json', 'r') as f:
-        profs = json.loads(f.read())
-      
-      html = '<html><body><form method="post">Name: <input type="text" name="name"/><br/>Info: <input type="text" name="info"/><br/><input type="submit"/></form><ul>'
-      for prof in profs:
-        html += '<li>%s: %s</li>' % (prof['name'], prof['info'],)
-      html += '</ul></body></html>'
-      
-      return html
+        if not os.path.isfile('profiles.json'):
+            with open('profiles.json', 'w') as f:
+                f.write(json.dumps([]))
 
-    @app.route('/', methods = ['POST'])
+        with open('profiles.json', 'r') as f:
+            profs = json.loads(f.read())
+
+        profs.sort(key=lambda prof: prof['name'])
+
+        with open('queirdos.html', 'r') as f:
+            html = Template(f.read()).render({
+                'stylesheet': flask.url_for('static', filename='pink_on_black.css'),
+                'profiles': profs
+            })
+
+        return html
+
+    @app.route('/transmitter_info', methods=['GET'])
+    def get_transmitter_info():
+        return json.dumps({
+            'name': 'Queirdos',
+            'description': 'A list of people who come to the space.'
+        })
+
+    @app.route('/', methods=['POST'])
     def post_queirdos():
-      
-      if not os.path.isfile('profiles.json'):
+
+        if not os.path.isfile('profiles.json'):
+            with open('profiles.json', 'w') as f:
+                f.write(json.dumps([]))
+
+        with open('profiles.json', 'r') as f:
+            profs = json.loads(f.read())
+
+        profs += [{'name': flask.request.form['name'],
+                   'info': flask.request.form['info'],
+                   'uid': ''.join([random.choice('0123456789abcdef')
+                                   for _ in range(32)])
+                   }]
+
         with open('profiles.json', 'w') as f:
-          f.write(json.dumps([]))
+            f.write(json.dumps(profs))
 
-      with open('profiles.json', 'r') as f:
-        profs = json.loads(f.read())
+        return flask.redirect('/')
 
-      profs += [{ 'name': flask.request.form['name'], 'info': flask.request.form['info'] }]
-      print(profs)     
-      with open('profiles.json', 'w') as f:
-        f.write(json.dumps(profs))
-      
-      return flask.redirect('/')
+    @app.route('/delete/<uid>', methods=['GET'])
+    def delete_quierdo(uid):
 
-    app.run(host = '0.0.0.0', port = port)
+        with open('profiles.json', 'r') as f:
+            profs = json.loads(f.read())
+
+        with open('profiles.json', 'w') as f:
+            f.write(json.dumps([
+                prof for prof in profs
+                if prof['uid'] != uid
+            ]))
+
+        return flask.redirect('/')
+
+    app.run(host='0.0.0.0', port=port)
