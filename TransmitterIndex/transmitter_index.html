@@ -17,6 +17,7 @@
   <body>
     <h1>Transmitters</h1>
     <p>Automatically refreshes every 60 seconds.</p>
+    <p>Transmitters are taken off the list after 20 minutes of silence.</p>
     {% if transmitters|length %}
     {% for trans in transmitters %}
     <h2>{{ trans['name']|e }}</h2>
